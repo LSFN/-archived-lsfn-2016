@@ -2,7 +2,7 @@ syntax = "proto3";
 package protobuf;
 
 message JoinRequest {
-	string vesselID = 1; // If reconnecting, the ID of this ship server previously issued by the environment.
+	string vesselID = 1; // If reconnecting, the ID of this vessel previously issued by the environment.
 }
 
 message vesselToEnvironment {
