@@ -6,7 +6,7 @@ message JoinResponse {
 	string vesselID = 1; // The ID of this vessel; generated and issued by the environment if the join is successful.
 }
 
-message e2v {
+message environmentToVessel {
 	string protocolVersion = 1;
 	JoinResponse joinResponse = 2;
 }

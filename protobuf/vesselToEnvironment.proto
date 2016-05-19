@@ -5,7 +5,7 @@ message JoinRequest {
 	string shipServerID = 1; // If reconnecting, the ID of this ship server previously issued by the environment.
 }
 
-message v2e {
+message vesselToEnvironment {
 	string protocolVersion = 1;
 	JoinRequest joinRequest = 2;
 }
