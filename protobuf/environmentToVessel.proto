@@ -1,0 +1,12 @@
+syntax = "proto3";
+package protobuf;
+
+message JoinResponse {
+	bool joinSuccessful = 1;
+	string vesselID = 2; // The ID of this vessel; generated and issued by the environment if the join is successful.
+}
+
+message environmentToVessel {
+	string protocolVersion = 1;
+	JoinResponse joinResponse = 2;
+}
