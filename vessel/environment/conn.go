@@ -15,8 +15,8 @@ const (
 )
 
 type Conn struct {
-	inbound  <-chan *protobuf.EnvironmentToVessel
-	outbound chan<- *protobuf.VesselToEnvironment
+	Inbound  <-chan *protobuf.EnvironmentToVessel
+	Outbound chan<- *protobuf.VesselToEnvironment
 }
 
 func ConnectToEnvironment(environmentUDPAddress *net.UDPAddr) (*Conn, error) {
@@ -27,8 +27,8 @@ func ConnectToEnvironment(environmentUDPAddress *net.UDPAddr) (*Conn, error) {
 	inboundMessages := make(chan *protobuf.EnvironmentToVessel, MESSAGE_BUFFER_SIZE)
 	outboundMessages := make(chan *protobuf.VesselToEnvironment, MESSAGE_BUFFER_SIZE)
 	environmentConnection := &Conn{
-		inbound:  inboundMessages,
-		outbound: outboundMessages,
+		Inbound:  inboundMessages,
+		Outbound: outboundMessages,
 	}
 	go readFromServer(conn, inboundMessages)
 	go writeToServer(conn, outboundMessages)
