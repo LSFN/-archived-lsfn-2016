@@ -4,7 +4,7 @@ import (
 	"flag"
 	"net"
 
-	"github.com/Lukeus_Maximus/lsfn/vessel/environment"
+	"github.com/LSFN/lsfn/vessel/environment"
 )
 
 func main() {
