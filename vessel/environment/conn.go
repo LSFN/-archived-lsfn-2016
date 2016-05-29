@@ -19,14 +19,14 @@ type Conn struct {
 	outbound chan<- *protobuf.VesselToEnvironment
 }
 
-func ConnectToEnvironment(environmentUDPAddress *net.UDPAddr) (*EnvironmentConnection, error) {
+func ConnectToEnvironment(environmentUDPAddress *net.UDPAddr) (*Conn, error) {
 	conn, err := net.DialUDP("udp", nil, environmentUDPAddress)
 	if err != nil {
 		return nil, err
 	}
 	inboundMessages := make(chan *protobuf.EnvironmentToVessel, MESSAGE_BUFFER_SIZE)
 	outboundMessages := make(chan *protobuf.VesselToEnvironment, MESSAGE_BUFFER_SIZE)
-	environmentConnection := &EnvironmentConnection{
+	environmentConnection := &Conn{
 		inbound:  inboundMessages,
 		outbound: outboundMessages,
 	}
