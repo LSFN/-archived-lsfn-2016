@@ -7,14 +7,14 @@ import (
 
 	"github.com/golang/protobuf/proto"
 
-	"github.com/Lukeus_Maximus/lsfn/vessel/protobuf"
+	"github.com/LSFN/lsfn/vessel/protobuf"
 )
 
 const (
 	MESSAGE_BUFFER_SIZE = 10
 )
 
-type EnvironmentConnection struct {
+type Conn struct {
 	inbound  <-chan *protobuf.EnvironmentToVessel
 	outbound chan<- *protobuf.VesselToEnvironment
 }
