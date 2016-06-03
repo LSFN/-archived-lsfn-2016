@@ -23,7 +23,8 @@ data and any administrative state.
 
 ### Protocol Version ###
 
-Every packet is sent with a string-based protocol version.
+Every packet is sent with a string-based protocol version in the field
+`protocolVersion`.
 
 #### Protocol Version Negotiation ####
 
@@ -43,27 +44,28 @@ packet containing a protocol version different to its own.
 ### Vessel Identifier ###
 
 The vessel identifier identifies the vessel to the environment. These are issued
-by the environment and are present on every packet that is sent from the vessel.
+by the environment and are present on every packet that is sent from the vessel in
+the field `vesselID`.
 
 #### Game Join Negotiation ####
 
 A vessel is either joining or rejoining the environment. If it is rejoining then it
-has been previously issued with a vessel ID and it should send this with every
+has been previously issued with a `vesselID` and it should send this with every
 packet it sends to the environment. If the vessel hasn't been issued one then it
 can simply be omitted from the packets the vessel sends.
 
-When receiving packets from a vessel, the environment inspects the vessel ID. If it
-recognises the vessel ID then it sets the join status boolean to true on all future
-packets it sends to the vessel. If it doesn't or there is no vessel ID then it
-decides whether to let the vessel join the game. If it will allow the join, it sets
-the join status boolean to true on future packets and sends a new vessel ID. If it
-denies the join, the join status boolean is set to false.
+When receiving packets from a vessel, the environment inspects `vesselID`. If
+it recognises the vesselID then it sets the `joinStatus` boolean to `true` on all
+future packets it sends to the vessel. If it doesn't or there is no vessel ID then
+it decides whether to let the vessel join the game. If it will allow the join, it
+sets `joinStatus` to `true` on future packets and sends a new vessel ID. If it
+denies the join, `joinStatus` is set to `false`.
 
-If the vessel receives a join status of false then it must stop any further
-communication with the vessel. If the join status is true and the environment has
+If the vessel receives a `joinStatus` of `false` then it must stop any further
+communication with the vessel. If `joinStatus` is `true` and the environment has
 not provided a vessel ID, the vessel assumes that it has rejoined successfully.
-If the join status is true and the environment is providing a vessel ID, the vessel
-has joined successfully and sets the vessel ID on every future packet it sends. In 
+If `joinStatus` is `true` and the environment is providing a vessel ID, the vessel
+has joined successfully and sets `vesselID` on every future packet it sends. In 
 the case where the a rejoining vessel receives a different vessel ID back from the
 environment, the vessel has joined successfully and must set the new vessel ID on
 every future packet but it must also erase any previously stored state received
@@ -80,10 +82,10 @@ undesirable game state changes, each packet will be sent with information that
 allows the receiver to determine if the content of the packet is the latest it
 has received.
 
-This is implemented as a one-byte "sync number". Each packet sent by either the
-vessel or environment will have this field set. This number increments with each
-sent packet. If the sync number is to be incremeted beyond 255, it is set to 0.
-Thus, the sync numbers move in a 256-step cycle.
+This is implemented as the one-byte field `syncNumber`. Each packet sent by either
+the vessel or environment will have this field set. This number increments with
+each sent packet. If the sync number is to be incremeted beyond 255, it is set
+to 0. Thus, the sync numbers move in a 256-step cycle.
 
 When information is received in a packet, it should be stored with the packet's
 sync number. When packet is received with information that would overwrite the
@@ -97,7 +99,7 @@ to be out-of-date and will therefore be discarded.
 The following psuedocode describes the sync number comparison algorithm.
 ```
 s = stored version sync number
-p = packet sync number
+p = packet `syncNumber`
 if s < 128 {
 	if s < p < s + 128 {
 		packet version is more recent
