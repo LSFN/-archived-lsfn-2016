@@ -1,11 +1,10 @@
 syntax = "proto3";
 package protobuf;
 
-message JoinRequest {
-	string vesselID = 1; // If reconnecting, the ID of this vessel previously issued by the environment.
-}
+import "shipInput.proto";
 
 message vesselToEnvironment {
 	string protocolVersion = 1;
-	JoinRequest joinRequest = 2;
+	string vesselID = 2;
+	ShipInput shipInput = 3;
 }
