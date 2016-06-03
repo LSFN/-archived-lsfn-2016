@@ -6,5 +6,6 @@ import "shipInput.proto";
 message vesselToEnvironment {
 	string protocolVersion = 1;
 	string vesselID = 2;
-	ShipInput shipInput = 3;
+	uint32 syncNumber = 3;
+	ShipInput shipInput = 4;
 }

@@ -38,6 +38,7 @@ message environmentToVessel {
 	string protocolVersion = 1;
 	bool joinStatus = 2;
 	string vesselID = 3;
-	ShipInput shipInput = 4;
-	ShipSensors shipSensors = 5;
+	uint32 syncNumber = 4;
+	ShipInput shipInput = 5;
+	ShipSensors shipSensors = 6;
 }
