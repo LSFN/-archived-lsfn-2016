@@ -67,8 +67,106 @@ has joined successfully and sets the vessel ID on every future packet it sends. 
 the case where the a rejoining vessel receives a different vessel ID back from the
 environment, the vessel has joined successfully and must set the new vessel ID on
 every future packet but it must also erase any previously stored state received
-from the environment. 
+from the environment.
 
-###  ###
+If the environment issued a new vessel ID, the environment should stop sending the
+vessel ID to the vessel when the vessel starts sending that vessel ID on the
+packets it sends to the environment.
+
+### Sync Number ###
+
+To prevent packets received out-of-order by the environment from causing
+undesirable game state changes, each packet will be sent with information that
+allows the receiver to determine if the content of the packet is the latest it
+has received.
+
+This is implemented as a one-byte "sync number". Each packet sent by either the
+vessel or environment will have this field set. This number increments with each
+sent packet. If the sync number is to be incremeted beyond 255, it is set to 0.
+Thus, the sync numbers move in a 256-step cycle.
+
+When information is received in a packet, it should be stored with the packet's
+sync number. When packet is received with information that would overwrite the
+stored version, the sync number of the stored version and the packet's version are
+compared. If the packet's sync number is 128 or fewer ahead in the sync number
+cycle, the packet's version is assumed to be more recent. Otherwise, it is assumed
+to be out-of-date and will therefore be discarded.
+
+#### Comparison Algorithm ####
+
+The following psuedocode describes the sync number comparison algorithm.
+```
+s = stored version sync number
+p = packet sync number
+if s < 128 {
+	if s < p < s + 128 {
+		packet version is more recent
+	} else {
+		packet version is out-of-date
+	}
+} else {
+	if s - 128 < p < s {
+		packet version is out-of-date
+	} else {
+		packet version is more recent
+	}
+}
+```
+
+#### Packet Granularity ####
+
+An important feature of the protocol is the ability to split updates to state into
+different packets. Because the protocol uses UDP, it is limited to a packet size of
+slightly less than 2^16 bytes. In the case where the information we want to send to
+the receiver doesn't fit in a single packet, it can simply be divided among several
+packets.
+
+However, as UDP is unreliable, it is the case that not all of these packets will be
+received resulting in only some of the updates being applied. Depending on what the
+split-up information is, the consequeces of receiving partial information could be
+worse than simply not receiving that information.
+
+For example, a ship with two engines has two separate input throttles. If these
+throttle inputs were split between packets then it could be the case that a player
+that intended to increase both throttles simultaneously sees their ship veer in one
+direction because the environment received an update to one throttle but not the
+other. It would be far better for the throttle inputs not to be split between
+packets to prevent undesirable ship movement.
+
+This protocol must be designed such that information split between packets doesn't
+cause chaos in this fashion.
+
+### Ship Input State ###
+
+The vessel controls its ship on the environment by sending the environment what it
+thinks all of the control inputs to the ship should currently be set to. This
+includes throttle positions, thruster switches and weapon triggers.
+
+The environment also sends the same set of information back to the vessel. This
+shows the vessel the input that the environment is actually applying to the ship.
+
+The following fields are sent
+* Engine throttles x 2 (left and right) as floating point values between 0 and 1
+* Thrusters x 8 (2 at each end of each side of a square ship) as booleans
+* Gun trigger x 1 as a boolean
+
+Note: The gun trigger is as on an automatic weapon. A `true` value indicates that
+the weapon should fire continuously whilst `false` indicates that it should not.
+
+### Ship Sensor Readings ###
+
+The vessel receives information on the ship's surroundings. The information is as
+you might expect to receive from a simple visual sensor giving information from the
+ship's immediate surroundings. It is the environment that determines how far away
+the ship can actually sense objects. To ensure the vessel knows only what it is
+meant to know, the environment only sends information about objects within that
+vessel's ship's sensor range. Objects that no information is sent for might as well
+not exist to the receiving vessel.
+
+The following fields are sent *for each object*
+* Object type (ship or bullet) as an enum value
+* Position (x and y) as floating point values
+* Velocity (x and y) as floating point values
+
 
 
