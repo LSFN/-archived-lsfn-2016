@@ -166,7 +166,16 @@ not exist to the receiving vessel.
 The following fields are sent *for each object*
 * Object type (ship or bullet) as an enum value
 * Position (x and y) as floating point values
+* Orientation as a floating point value in radians
 * Velocity (x and y) as floating point values
+These values are given using the ship that is seeing the object as the point of
+reference. Therefore, if a ship is infront of the viewing ship and facing towards
+it then it would have an orientation of pi radians, an x-position of 0 and a
+y-position of some positive number. To better understand the coordinate system of a
+ship, imagine the ship's center to be the origin of a standard 2D coordinate space.
++X is to the right and +Y is forwards. A ship always points to +Y in its own
+coordinate system.
 
-
+The ship also senses one piece of information about itself which is its health.
+This is a single integer field separate from the visual sensors.
 
