@@ -65,10 +65,13 @@ func (environment *Environment) receive(stopChan chan<- bool) {
 
 func (environment *Environment) send(stopChan <-chan bool) {
 	ticker := time.NewTicker(NET_PERIOD)
+	var sync syncNumber = 0
 	for {
 		select {
 		case <-ticker.C:
 			environment.conn.outbound <- environment.outboundHolder
+			environment.outboundHolder.SyncNumber = uint32(sync)
+			sync = sync.next()
 		case <-stopChan:
 			break
 		}
