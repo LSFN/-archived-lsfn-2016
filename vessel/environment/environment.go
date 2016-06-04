@@ -13,24 +13,50 @@ const (
 	NET_PERIOD       = ((1000 / NET_RATE) * time.Millisecond)
 )
 
+type shipInputStateStore struct {
+	state *protobuf.ShipInput
+	sync  syncNumber
+}
+
+type shipSensorsStateStore struct {
+	state *protobuf.ShipSensors
+	sync  syncNumber
+}
+
+type environmentStateStore struct {
+	shipInput   *shipInputStateStore
+	shipSensors *shipSensorsStateStore
+}
+
 type Environment struct {
 	conn           *conn
 	outboundHolder *protobuf.VesselToEnvironment
-	inboundHolder  *protobuf.EnvironmentToVessel
+	stateStore     *environmentStateStore
 }
 
 func NewEnvironment(environmentUDPAddress *net.UDPAddr) (*Environment, error) {
 	environment := new(Environment)
+
 	conn, err := connectToEnvironment(environmentUDPAddress)
 	environment.conn = conn
 	if err != nil {
 		return nil, err
 	}
-	environment.inboundHolder = new(protobuf.EnvironmentToVessel)
+
 	environment.outboundHolder = new(protobuf.VesselToEnvironment)
+
+	environment.stateStore = new(environmentStateStore)
+	environment.stateStore.shipInput = new(shipInputStateStore)
+	environment.stateStore.shipInput.state = new(protobuf.ShipInput)
+	environment.stateStore.shipInput.sync = 0
+	environment.stateStore.shipSensors = new(shipSensorsStateStore)
+	environment.stateStore.shipSensors.state = new(protobuf.ShipSensors)
+	environment.stateStore.shipSensors.sync = 0
+
 	stopChan := make(chan bool)
 	go environment.send(stopChan)
 	go environment.receive(stopChan)
+
 	return environment, nil
 }
 
@@ -42,10 +68,8 @@ func (environment *Environment) receive(stopChan chan<- bool) {
 		}
 
 		// Join
-		environment.inboundHolder.JoinStatus = receivedPacket.JoinStatus
 		if receivedPacket.JoinStatus {
 			if receivedPacket.VesselID != "" {
-				environment.inboundHolder.VesselID = receivedPacket.VesselID
 				environment.outboundHolder.VesselID = receivedPacket.VesselID
 			}
 		} else {
@@ -53,11 +77,14 @@ func (environment *Environment) receive(stopChan chan<- bool) {
 		}
 
 		// Merge the content of the received packet with the inbound holder packet
-		if receivedPacket.ShipInput != nil {
-			environment.inboundHolder.ShipInput = receivedPacket.ShipInput
+		var sync syncNumber = syncNumber(receivedPacket.SyncNumber)
+		if receivedPacket.ShipInput != nil && sync.newerThan(environment.stateStore.shipInput.sync) {
+			environment.stateStore.shipInput.state = receivedPacket.ShipInput
+			environment.stateStore.shipInput.sync = sync
 		}
-		if receivedPacket.ShipSensors != nil {
-			environment.inboundHolder.ShipSensors = receivedPacket.ShipSensors
+		if receivedPacket.ShipSensors != nil && sync.newerThan(environment.stateStore.shipSensors.sync) {
+			environment.stateStore.shipSensors.state = receivedPacket.ShipSensors
+			environment.stateStore.shipSensors.sync = sync
 		}
 	}
 	stopChan <- true
@@ -83,9 +110,9 @@ func (environment *Environment) SetShipInput(input *protobuf.ShipInput) {
 }
 
 func (environment *Environment) GetShipInput() *protobuf.ShipInput {
-	return environment.inboundHolder.ShipInput
+	return environment.stateStore.shipInput.state
 }
 
 func (environment *Environment) GetShipSensors() *protobuf.ShipSensors {
-	return environment.inboundHolder.ShipSensors
+	return environment.stateStore.shipSensors.state
 }
