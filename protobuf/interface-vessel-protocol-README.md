@@ -31,15 +31,15 @@ should be ignored therafter and doesn't need to be added to future messages.
 ### Ship Input ###
 
 When an interface wishes to provide changes for one or more ship inputs, it sets
-only the relevant fields on a `ShipInput` message and sends it to the vessel. The
-vessel updates all the parts of the combined ship input that were specified in the
-received packet. Any parts of the input that were unspecified by the interface are
-left unaltered.
+only the relevant fields on a `ShipInput` message and sends it to the vessel in the
+`shipInput` field. The vessel updates all the parts of the combined ship input that
+were specified in the received message. Any parts of the input that were
+unspecified by the interface are left unaltered.
 
 The vessel can update the interfaces with the true ship input that it has received
-from the environment.
+from the environment by sending it to the interfaces in the `shipInput` field.
 
 ### Ship Sensors ###
 
 To update the interfaces' view of the world, the vessel can send a ship sensors
-message.
+message in the `shipSensors` field.
