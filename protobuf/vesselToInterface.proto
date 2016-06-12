@@ -1,0 +1,11 @@
+syntax = "proto3";
+package protobuf;
+
+import "shipInput.proto";
+import "shipSensors.proto";
+
+message VesselToInterface {
+	string protocolVersion = 1;
+	ShipInput shipInput = 2;
+	ShipSensors shipSensors = 3;
+}
