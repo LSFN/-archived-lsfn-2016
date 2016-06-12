@@ -1,0 +1,7 @@
+syntax = "proto3";
+package protobuf;
+
+message Position {
+	double x = 1;
+	double y = 2;
+}
