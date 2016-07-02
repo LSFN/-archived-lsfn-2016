@@ -1,7 +1,7 @@
 package environment
 
 //go:generate mkdir -p ../protobuf
-//go:generate protoc3 -I $GOPATH/src/github.com/LSFN/lsfn/protobuf --go_out=../protobuf $GOPATH/src/github.com/LSFN/lsfn/protobuf/shipInput.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/environmentToVessel.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/vesselToEnvironment.proto
+//go:generate protoc3 -I $GOPATH/src/github.com/LSFN/lsfn/protobuf --go_out=../protobuf $GOPATH/src/github.com/LSFN/lsfn/protobuf/velocity.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/position.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/shipSensors.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/shipInput.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/environmentToVessel.proto $GOPATH/src/github.com/LSFN/lsfn/protobuf/vesselToEnvironment.proto
 
 import (
 	"net"
