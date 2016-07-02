@@ -15,31 +15,31 @@ const (
 	MESSAGE_BUFFER_SIZE = 10
 )
 
-type Conn struct {
-	Inbound  <-chan *protobuf.EnvironmentToVessel
-	Outbound chan<- *protobuf.VesselToEnvironment
+type conn struct {
+	inbound  <-chan *protobuf.EnvironmentToVessel
+	outbound chan<- *protobuf.VesselToEnvironment
 }
 
-func ConnectToEnvironment(environmentUDPAddress *net.UDPAddr) (*Conn, error) {
-	conn, err := net.DialUDP("udp", nil, environmentUDPAddress)
+func connectToEnvironment(environmentUDPAddress *net.UDPAddr) (*conn, error) {
+	udpConn, err := net.DialUDP("udp", nil, environmentUDPAddress)
 	if err != nil {
 		return nil, err
 	}
 	inboundMessages := make(chan *protobuf.EnvironmentToVessel, MESSAGE_BUFFER_SIZE)
 	outboundMessages := make(chan *protobuf.VesselToEnvironment, MESSAGE_BUFFER_SIZE)
-	environmentConnection := &Conn{
-		Inbound:  inboundMessages,
-		Outbound: outboundMessages,
+	environmentConnection := &conn{
+		inbound:  inboundMessages,
+		outbound: outboundMessages,
 	}
-	go readFromServer(conn, inboundMessages)
-	go writeToServer(conn, outboundMessages)
+	go readFromServer(udpConn, inboundMessages)
+	go writeToServer(udpConn, outboundMessages)
 	return environmentConnection, nil
 }
 
-func readFromServer(conn *net.UDPConn, inboundMessages chan<- *protobuf.EnvironmentToVessel) {
+func readFromServer(udpConn *net.UDPConn, inboundMessages chan<- *protobuf.EnvironmentToVessel) {
 	var readBuf []byte
 	for {
-		_, _, err := conn.ReadFromUDP(readBuf)
+		_, _, err := udpConn.ReadFromUDP(readBuf)
 		if err != nil {
 			break
 		}
